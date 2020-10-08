@@ -71,7 +71,7 @@ var ProjectInput = /** @class */ (function () {
             max: 5
         };
         if (!validate(titleValidate) || !validate(descriptionValidate) || !validate(peopleValidate)) {
-            alert("incomplete input, please try again");
+            alert("validation failed! try again");
             return;
         }
         else {
