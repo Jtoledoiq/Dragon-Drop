@@ -1,4 +1,5 @@
 "use strict";
+// Drag and Drop Interfaces
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
@@ -126,12 +127,39 @@ var ProjectItem = /** @class */ (function (_super) {
         _this.renderContent();
         return _this;
     }
-    ProjectItem.prototype.configure = function () { };
+    Object.defineProperty(ProjectItem.prototype, "persons", {
+        get: function () {
+            if (this.project.people === 1) {
+                return "1 person";
+            }
+            else {
+                return this.project.people + " persons";
+            }
+        },
+        enumerable: false,
+        configurable: true
+    });
+    ProjectItem.prototype.dragStartHandler = function (event) {
+        console.log(event);
+    };
+    ProjectItem.prototype.dragEndHandler = function (_) {
+        console.log('dragend');
+    };
+    ProjectItem.prototype.configure = function () {
+        this.element.addEventListener('dragstart', this.dragStartHandler);
+        this.element.addEventListener('dragend', this.dragEndHandler);
+    };
     ProjectItem.prototype.renderContent = function () {
         this.element.querySelector('h2').textContent = this.project.title;
-        this.element.querySelector('h3').textContent = this.project.people.toString();
+        this.element.querySelector('h3').textContent = this.persons + '  assigned';
         this.element.querySelector('p').textContent = this.project.description;
     };
+    __decorate([
+        autobind
+    ], ProjectItem.prototype, "dragStartHandler", null);
+    __decorate([
+        autobind
+    ], ProjectItem.prototype, "dragEndHandler", null);
     return ProjectItem;
 }(Component));
 //ProjectList Class
@@ -151,7 +179,7 @@ var ProjectList = /** @class */ (function (_super) {
         listEl.innerHTML = '';
         for (var _i = 0, _a = this.assignedProjects; _i < _a.length; _i++) {
             var prjItem = _a[_i];
-            new ProjectItem(this.element.id, prjItem);
+            new ProjectItem(this.element.querySelector('ul').id, prjItem);
         }
     };
     ProjectList.prototype.configure = function () {
@@ -205,7 +233,7 @@ var ProjectInput = /** @class */ (function (_super) {
         var peopleValidate = {
             value: +enteredPeople,
             required: true,
-            min: 1,
+            min: 0,
             max: 5
         };
         if (!validate(titleValidate) || !validate(descriptionValidate) || !validate(peopleValidate)) {
