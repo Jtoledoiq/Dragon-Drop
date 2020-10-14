@@ -61,6 +61,16 @@ var ProjectState = /** @class */ (function (_super) {
     ProjectState.prototype.addProject = function (title, description, numOfPeople) {
         var newProject = new Project(Math.random().toString(), title, description, numOfPeople, ProjectStatus.Active);
         this.projects.push(newProject);
+        this.updateStateListener();
+    };
+    ProjectState.prototype.moveProject = function (projectID, newStatus) {
+        var project = this.projects.find(function (prj) { return prj.id === projectID; });
+        if (project && project.status != newStatus) {
+            project.status = newStatus;
+            this.updateStateListener();
+        }
+    };
+    ProjectState.prototype.updateStateListener = function () {
         for (var _i = 0, _a = this.listeners; _i < _a.length; _i++) {
             var listenerFn = _a[_i];
             listenerFn(this.projects.slice());
@@ -144,7 +154,6 @@ var ProjectItem = /** @class */ (function (_super) {
         event.dataTransfer.effectAllowed = "move";
     };
     ProjectItem.prototype.dragEndHandler = function (_) {
-        console.log('dragend');
     };
     ProjectItem.prototype.configure = function () {
         this.element.addEventListener('dragstart', this.dragStartHandler);
@@ -191,7 +200,8 @@ var ProjectList = /** @class */ (function (_super) {
         }
     };
     ProjectList.prototype.dropHandler = function (event) {
-        console.log(event);
+        var prjId = event.dataTransfer.getData('text/plain');
+        projectState.moveProject(prjId, this.type === "active" ? ProjectStatus.Active : ProjectStatus.Finished);
     };
     ProjectList.prototype.dragLeaveHandler = function (_) {
         var listEl = this.element.querySelector('ul');
@@ -220,6 +230,9 @@ var ProjectList = /** @class */ (function (_super) {
     __decorate([
         autobind
     ], ProjectList.prototype, "dragOverHandler", null);
+    __decorate([
+        autobind
+    ], ProjectList.prototype, "dropHandler", null);
     __decorate([
         autobind
     ], ProjectList.prototype, "dragLeaveHandler", null);
