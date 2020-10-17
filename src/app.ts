@@ -10,21 +10,6 @@
 
 namespace App {
     
-    //Project Type
-     
-    
-
-    
-   
-    
-    
-
-    
-    
-    
-    
-    
-    
     
     const prjInput = new ProjectInput();
     const activePrjList = new ProjectList('active');
