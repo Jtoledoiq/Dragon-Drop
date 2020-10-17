@@ -18,6 +18,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+//Project Type
 var App;
 (function (App) {
     var ProjectStatus;
@@ -37,11 +38,8 @@ var App;
     }());
     App.Project = Project;
 })(App || (App = {}));
-///<reference path ="drag-drop-interfaces.ts"  />
-///<reference path ="project-model.ts"  />
 var App;
 (function (App) {
-    //Project Type
     var State = /** @class */ (function () {
         function State() {
             this.listeners = [];
@@ -85,7 +83,11 @@ var App;
         };
         return ProjectState;
     }(State));
-    var projectState = ProjectState.getInstance();
+    App.ProjectState = ProjectState;
+    App.projectState = ProjectState.getInstance();
+})(App || (App = {}));
+var App;
+(function (App) {
     function validate(validatableInput) {
         var isValid = true;
         if (validatableInput.required) {
@@ -105,6 +107,10 @@ var App;
         }
         return isValid;
     }
+    App.validate = validate;
+})(App || (App = {}));
+var App;
+(function (App) {
     //autobind Decarator
     function autobind(_, _2, descriptor) {
         var originalMethod = descriptor.value;
@@ -117,6 +123,10 @@ var App;
         };
         return adjDescriptor;
     }
+    App.autobind = autobind;
+})(App || (App = {}));
+var App;
+(function (App) {
     //Component Base Class
     var Component = /** @class */ (function () {
         function Component(templateID, hostElementId, insertAtStart, newElementId) {
@@ -134,6 +144,78 @@ var App;
         };
         return Component;
     }());
+    App.Component = Component;
+})(App || (App = {}));
+var App;
+(function (App) {
+    //ProjectInput Class
+    var ProjectInput = /** @class */ (function (_super) {
+        __extends(ProjectInput, _super);
+        //buttonInputElement:HTMLButtonElement;
+        function ProjectInput() {
+            var _this = _super.call(this, 'project-input', 'app', true, "user-input") || this;
+            _this.titleInputElement = _this.element.querySelector('#title');
+            _this.descriptionInputElement = _this.element.querySelector('#description');
+            _this.peopleInputElement = _this.element.querySelector('#people');
+            _this.configure();
+            return _this;
+        }
+        ProjectInput.prototype.configure = function () {
+            this.element.addEventListener('submit', this.submitHandler);
+        };
+        ProjectInput.prototype.renderContent = function () { };
+        ProjectInput.prototype.gatherUserInput = function () {
+            var enteredTitle = this.titleInputElement.value;
+            var enteredDescription = this.descriptionInputElement.value;
+            var enteredPeople = this.peopleInputElement.value;
+            var titleValidate = {
+                value: enteredTitle,
+                required: true
+            };
+            var descriptionValidate = {
+                value: enteredDescription,
+                required: true,
+                minLength: 5,
+            };
+            var peopleValidate = {
+                value: +enteredPeople,
+                required: true,
+                min: 0,
+                max: 5
+            };
+            if (!App.validate(titleValidate) || !App.validate(descriptionValidate) || !App.validate(peopleValidate)) {
+                alert("validation failed! try again");
+                return;
+            }
+            else {
+                return [enteredTitle, enteredDescription, +enteredPeople];
+            }
+        };
+        ProjectInput.prototype.clearInputs = function () {
+            this.titleInputElement.value = "";
+            this.descriptionInputElement.value = "";
+            this.peopleInputElement.value = "";
+        };
+        ProjectInput.prototype.submitHandler = function (event) {
+            event.preventDefault();
+            var userInput = this.gatherUserInput();
+            if (Array.isArray(userInput)) {
+                var title = userInput[0], desc = userInput[1], people = userInput[2];
+                console.log(title, desc, people);
+                App.projectState.addProject(title, desc, people);
+                this.clearInputs();
+            }
+        };
+        __decorate([
+            App.autobind
+        ], ProjectInput.prototype, "submitHandler", null);
+        return ProjectInput;
+    }(App.Component));
+    App.ProjectInput = ProjectInput;
+})(App || (App = {}));
+///<reference path ="base-component.ts"  />
+var App;
+(function (App) {
     //ProjectItem Class
     var ProjectItem = /** @class */ (function (_super) {
         __extends(ProjectItem, _super);
@@ -172,13 +254,18 @@ var App;
             this.element.querySelector('p').textContent = this.project.description;
         };
         __decorate([
-            autobind
+            App.autobind
         ], ProjectItem.prototype, "dragStartHandler", null);
         __decorate([
-            autobind
+            App.autobind
         ], ProjectItem.prototype, "dragEndHandler", null);
         return ProjectItem;
-    }(Component));
+    }(App.Component));
+    App.ProjectItem = ProjectItem;
+})(App || (App = {}));
+///<reference path ="base-component.ts"  />
+var App;
+(function (App) {
     //ProjectList Class
     var ProjectList = /** @class */ (function (_super) {
         __extends(ProjectList, _super);
@@ -196,7 +283,7 @@ var App;
             listEl.innerHTML = '';
             for (var _i = 0, _a = this.assignedProjects; _i < _a.length; _i++) {
                 var prjItem = _a[_i];
-                new ProjectItem(this.element.querySelector('ul').id, prjItem);
+                new App.ProjectItem(this.element.querySelector('ul').id, prjItem);
             }
         };
         ProjectList.prototype.dragOverHandler = function (event) {
@@ -208,7 +295,7 @@ var App;
         };
         ProjectList.prototype.dropHandler = function (event) {
             var prjId = event.dataTransfer.getData('text/plain');
-            projectState.moveProject(prjId, this.type === "active" ? App.ProjectStatus.Active : App.ProjectStatus.Finished);
+            App.projectState.moveProject(prjId, this.type === "active" ? App.ProjectStatus.Active : App.ProjectStatus.Finished);
         };
         ProjectList.prototype.dragLeaveHandler = function (_) {
             var listEl = this.element.querySelector('ul');
@@ -219,7 +306,7 @@ var App;
             this.element.addEventListener('dragover', this.dragOverHandler);
             this.element.addEventListener('dragleave', this.dragLeaveHandler);
             this.element.addEventListener('drop', this.dropHandler);
-            projectState.addListener(function (projects) {
+            App.projectState.addListener(function (projects) {
                 _this.assignedProjects = projects.filter(function (prj) {
                     if (_this.type === "active") {
                         return prj.status === App.ProjectStatus.Active;
@@ -235,80 +322,31 @@ var App;
             this.element.querySelector('h2').textContent = this.type.toUpperCase() + ' PROJECTS';
         };
         __decorate([
-            autobind
+            App.autobind
         ], ProjectList.prototype, "dragOverHandler", null);
         __decorate([
-            autobind
+            App.autobind
         ], ProjectList.prototype, "dropHandler", null);
         __decorate([
-            autobind
+            App.autobind
         ], ProjectList.prototype, "dragLeaveHandler", null);
         return ProjectList;
-    }(Component));
-    //ProjectInput Class
-    var ProjectInput = /** @class */ (function (_super) {
-        __extends(ProjectInput, _super);
-        //buttonInputElement:HTMLButtonElement;
-        function ProjectInput() {
-            var _this = _super.call(this, 'project-input', 'app', true, "user-input") || this;
-            _this.titleInputElement = _this.element.querySelector('#title');
-            _this.descriptionInputElement = _this.element.querySelector('#description');
-            _this.peopleInputElement = _this.element.querySelector('#people');
-            _this.configure();
-            return _this;
-        }
-        ProjectInput.prototype.configure = function () {
-            this.element.addEventListener('submit', this.submitHandler);
-        };
-        ProjectInput.prototype.renderContent = function () { };
-        ProjectInput.prototype.gatherUserInput = function () {
-            var enteredTitle = this.titleInputElement.value;
-            var enteredDescription = this.descriptionInputElement.value;
-            var enteredPeople = this.peopleInputElement.value;
-            var titleValidate = {
-                value: enteredTitle,
-                required: true
-            };
-            var descriptionValidate = {
-                value: enteredDescription,
-                required: true,
-                minLength: 5,
-            };
-            var peopleValidate = {
-                value: +enteredPeople,
-                required: true,
-                min: 0,
-                max: 5
-            };
-            if (!validate(titleValidate) || !validate(descriptionValidate) || !validate(peopleValidate)) {
-                alert("validation failed! try again");
-                return;
-            }
-            else {
-                return [enteredTitle, enteredDescription, +enteredPeople];
-            }
-        };
-        ProjectInput.prototype.clearInputs = function () {
-            this.titleInputElement.value = "";
-            this.descriptionInputElement.value = "";
-            this.peopleInputElement.value = "";
-        };
-        ProjectInput.prototype.submitHandler = function (event) {
-            event.preventDefault();
-            var userInput = this.gatherUserInput();
-            if (Array.isArray(userInput)) {
-                var title = userInput[0], desc = userInput[1], people = userInput[2];
-                console.log(title, desc, people);
-                projectState.addProject(title, desc, people);
-                this.clearInputs();
-            }
-        };
-        __decorate([
-            autobind
-        ], ProjectInput.prototype, "submitHandler", null);
-        return ProjectInput;
-    }(Component));
-    var prjInput = new ProjectInput();
-    var activePrjList = new ProjectList('active');
-    var finishedPrjList = new ProjectList('finished');
+    }(App.Component));
+    App.ProjectList = ProjectList;
+})(App || (App = {}));
+///<reference path ="models/drag-drop-interfaces.ts"  />
+///<reference path ="models/project-model.ts"  />
+///<reference path ="state/project-state.ts"  />
+///<reference path ="util/validation.ts"  />
+///<reference path ="autobind-decorator.ts"  />
+///<reference path ="components/base-component.ts"  />
+///<reference path ="components/project-input.ts"  />
+///<reference path ="components/project-item.ts"  />
+///<reference path ="components/project-list.ts"  />
+var App;
+(function (App) {
+    //Project Type
+    var prjInput = new App.ProjectInput();
+    var activePrjList = new App.ProjectList('active');
+    var finishedPrjList = new App.ProjectList('finished');
 })(App || (App = {}));

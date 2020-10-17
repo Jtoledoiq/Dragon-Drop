@@ -1,3 +1,4 @@
+    //Project Type
 namespace App {
 
     export enum ProjectStatus {Active, Finished}
