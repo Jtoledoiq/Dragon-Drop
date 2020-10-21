@@ -1,11 +1,11 @@
-import { Component } from './base-component.js';
-import { Validatable, validate } from '../util/validation.js';
-import { autobind } from '../decorators/autobind-decorator.js';
+import Cmp  from './base-component.js';
+import * as Validation from '../util/validation.js';
+import { autobind as Autobind } from '../decorators/autobind-decorator.js';
 import { projectState } from '../state/project-state.js'
 
 
     //ProjectInput Class
-    export class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
+    export class ProjectInput extends Cmp<HTMLDivElement, HTMLFormElement> {
     
         titleInputElement:HTMLInputElement;
         descriptionInputElement:HTMLInputElement;
@@ -36,16 +36,16 @@ import { projectState } from '../state/project-state.js'
             const enteredDescription = this.descriptionInputElement.value;
             const enteredPeople = this.peopleInputElement.value;
     
-            const titleValidate: Validatable = {
+            const titleValidate: Validation.Validatable = {
                 value: enteredTitle,
                 required: true
             }
-            const descriptionValidate: Validatable = {
+            const descriptionValidate: Validation.Validatable = {
                 value: enteredDescription,
                 required: true,
                 minLength: 5,
             }
-            const peopleValidate: Validatable = {
+            const peopleValidate: Validation.Validatable = {
                 value: +enteredPeople,
                 required: true,
                 min:0,
@@ -53,7 +53,7 @@ import { projectState } from '../state/project-state.js'
             }
     
             if (
-                !validate(titleValidate) || !validate(descriptionValidate) || !validate(peopleValidate)
+                !Validation.validate(titleValidate) || !Validation.validate(descriptionValidate) || !Validation.validate(peopleValidate)
             ) {
                 alert("validation failed! try again")
                 return;
@@ -71,7 +71,7 @@ import { projectState } from '../state/project-state.js'
             this.peopleInputElement.value = ""
         }
     
-        @autobind
+        @Autobind
         private submitHandler (event: Event) {
             event.preventDefault();
             const userInput = this.gatherUserInput()

@@ -1,7 +1,7 @@
 
 import { DragTarget } from "../models/drag-drop-interfaces.js"
 import { Project, ProjectStatus } from '../models/project-model.js'
-import { Component } from './base-component.js'
+import Cmp from './base-component.js'
 import { autobind } from '../decorators/autobind-decorator.js'
 import { projectState } from '../state/project-state.js'
 import { ProjectItem } from './project-item.js'
@@ -10,7 +10,7 @@ import { ProjectItem } from './project-item.js'
 
     //ProjectList Class
     
-    export class ProjectList extends Component<HTMLDivElement, HTMLElement> implements DragTarget{
+    export class ProjectList extends Cmp<HTMLDivElement, HTMLElement> implements DragTarget{
     
         assignedProjects: Project[];
         constructor(private type: 'active' | 'finished') {
