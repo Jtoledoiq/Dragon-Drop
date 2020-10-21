@@ -1,4 +1,4 @@
-    namespace App {
+ 
         //autobind Decarator
         export function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
             const originalMethod = descriptor.value;
@@ -12,4 +12,4 @@
             return adjDescriptor;
         }
 
-    }
+    

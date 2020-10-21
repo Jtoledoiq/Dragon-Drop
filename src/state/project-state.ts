@@ -1,5 +1,6 @@
- 
- namespace App {
+import { Project, ProjectStatus } from '../models/project-model.js';
+
+
 
      
      //Project State Management 
@@ -54,4 +55,4 @@
      }
      
      export const projectState = ProjectState.getInstance()
- }
+ 
