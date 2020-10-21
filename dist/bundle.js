@@ -18,25 +18,65 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-//Project Type
 var App;
 (function (App) {
-    var ProjectStatus;
-    (function (ProjectStatus) {
-        ProjectStatus[ProjectStatus["Active"] = 0] = "Active";
-        ProjectStatus[ProjectStatus["Finished"] = 1] = "Finished";
-    })(ProjectStatus = App.ProjectStatus || (App.ProjectStatus = {}));
-    var Project = /** @class */ (function () {
-        function Project(id, title, description, people, status) {
-            this.id = id;
-            this.title = title;
-            this.description = description;
-            this.people = people;
-            this.status = status;
+    //Component Base Class
+    var Component = /** @class */ (function () {
+        function Component(templateID, hostElementId, insertAtStart, newElementId) {
+            this.templateElement = document.getElementById(templateID);
+            this.hostElement = document.getElementById(hostElementId);
+            var importNode = document.importNode(this.templateElement.content, true);
+            this.element = importNode.firstElementChild;
+            if (newElementId) {
+                this.element.id = newElementId;
+            }
+            this.attach(insertAtStart);
         }
-        return Project;
+        Component.prototype.attach = function (insertAtBeginning) {
+            this.hostElement.insertAdjacentElement(insertAtBeginning ? 'afterbegin' : 'beforeend', this.element);
+        };
+        return Component;
     }());
-    App.Project = Project;
+    App.Component = Component;
+})(App || (App = {}));
+var App;
+(function (App) {
+    //autobind Decarator
+    function autobind(_, _2, descriptor) {
+        var originalMethod = descriptor.value;
+        var adjDescriptor = {
+            configurable: true,
+            get: function () {
+                var boundFn = originalMethod.bind(this);
+                return boundFn;
+            }
+        };
+        return adjDescriptor;
+    }
+    App.autobind = autobind;
+})(App || (App = {}));
+var App;
+(function (App) {
+    function validate(validatableInput) {
+        var isValid = true;
+        if (validatableInput.required) {
+            isValid = isValid && validatableInput.value.toString().trim().length !== 0;
+        }
+        if (validatableInput.minLength != null && typeof validatableInput.value == "string") {
+            isValid = isValid && validatableInput.value.length > validatableInput.minLength;
+        }
+        if (validatableInput.maxLength != null && typeof validatableInput.value == "string") {
+            isValid = isValid && validatableInput.value.length < validatableInput.maxLength;
+        }
+        if (validatableInput.min != null && typeof validatableInput.value == "number") {
+            isValid = isValid && validatableInput.value > validatableInput.min;
+        }
+        if (validatableInput.max != null && typeof validatableInput.value == "number") {
+            isValid = isValid && validatableInput.value < validatableInput.max;
+        }
+        return isValid;
+    }
+    App.validate = validate;
 })(App || (App = {}));
 var App;
 (function (App) {
@@ -86,66 +126,10 @@ var App;
     App.ProjectState = ProjectState;
     App.projectState = ProjectState.getInstance();
 })(App || (App = {}));
-var App;
-(function (App) {
-    function validate(validatableInput) {
-        var isValid = true;
-        if (validatableInput.required) {
-            isValid = isValid && validatableInput.value.toString().trim().length !== 0;
-        }
-        if (validatableInput.minLength != null && typeof validatableInput.value == "string") {
-            isValid = isValid && validatableInput.value.length > validatableInput.minLength;
-        }
-        if (validatableInput.maxLength != null && typeof validatableInput.value == "string") {
-            isValid = isValid && validatableInput.value.length < validatableInput.maxLength;
-        }
-        if (validatableInput.min != null && typeof validatableInput.value == "number") {
-            isValid = isValid && validatableInput.value > validatableInput.min;
-        }
-        if (validatableInput.max != null && typeof validatableInput.value == "number") {
-            isValid = isValid && validatableInput.value < validatableInput.max;
-        }
-        return isValid;
-    }
-    App.validate = validate;
-})(App || (App = {}));
-var App;
-(function (App) {
-    //autobind Decarator
-    function autobind(_, _2, descriptor) {
-        var originalMethod = descriptor.value;
-        var adjDescriptor = {
-            configurable: true,
-            get: function () {
-                var boundFn = originalMethod.bind(this);
-                return boundFn;
-            }
-        };
-        return adjDescriptor;
-    }
-    App.autobind = autobind;
-})(App || (App = {}));
-var App;
-(function (App) {
-    //Component Base Class
-    var Component = /** @class */ (function () {
-        function Component(templateID, hostElementId, insertAtStart, newElementId) {
-            this.templateElement = document.getElementById(templateID);
-            this.hostElement = document.getElementById(hostElementId);
-            var importNode = document.importNode(this.templateElement.content, true);
-            this.element = importNode.firstElementChild;
-            if (newElementId) {
-                this.element.id = newElementId;
-            }
-            this.attach(insertAtStart);
-        }
-        Component.prototype.attach = function (insertAtBeginning) {
-            this.hostElement.insertAdjacentElement(insertAtBeginning ? 'afterbegin' : 'beforeend', this.element);
-        };
-        return Component;
-    }());
-    App.Component = Component;
-})(App || (App = {}));
+///<reference path ="base-component.ts"  /> 
+///<reference path ="../decorators/autobind-decorator.ts"  />
+///<reference path ="../util/validation.ts"  />
+///<reference path ="../state/project-state.ts"  />
 var App;
 (function (App) {
     //ProjectInput Class
@@ -213,57 +197,31 @@ var App;
     }(App.Component));
     App.ProjectInput = ProjectInput;
 })(App || (App = {}));
-///<reference path ="base-component.ts"  />
+//Project Type
 var App;
 (function (App) {
-    //ProjectItem Class
-    var ProjectItem = /** @class */ (function (_super) {
-        __extends(ProjectItem, _super);
-        function ProjectItem(hostId, project) {
-            var _this = _super.call(this, 'single-project', hostId, false, project.id) || this;
-            _this.project = project;
-            _this.configure();
-            _this.renderContent();
-            return _this;
+    var ProjectStatus;
+    (function (ProjectStatus) {
+        ProjectStatus[ProjectStatus["Active"] = 0] = "Active";
+        ProjectStatus[ProjectStatus["Finished"] = 1] = "Finished";
+    })(ProjectStatus = App.ProjectStatus || (App.ProjectStatus = {}));
+    var Project = /** @class */ (function () {
+        function Project(id, title, description, people, status) {
+            this.id = id;
+            this.title = title;
+            this.description = description;
+            this.people = people;
+            this.status = status;
         }
-        Object.defineProperty(ProjectItem.prototype, "persons", {
-            get: function () {
-                if (this.project.people === 1) {
-                    return "1 person";
-                }
-                else {
-                    return this.project.people + " persons";
-                }
-            },
-            enumerable: false,
-            configurable: true
-        });
-        ProjectItem.prototype.dragStartHandler = function (event) {
-            event.dataTransfer.setData('text/plain', this.project.id);
-            event.dataTransfer.effectAllowed = "move";
-        };
-        ProjectItem.prototype.dragEndHandler = function (_) {
-        };
-        ProjectItem.prototype.configure = function () {
-            this.element.addEventListener('dragstart', this.dragStartHandler);
-            this.element.addEventListener('dragend', this.dragEndHandler);
-        };
-        ProjectItem.prototype.renderContent = function () {
-            this.element.querySelector('h2').textContent = this.project.title;
-            this.element.querySelector('h3').textContent = this.persons + '  assigned';
-            this.element.querySelector('p').textContent = this.project.description;
-        };
-        __decorate([
-            App.autobind
-        ], ProjectItem.prototype, "dragStartHandler", null);
-        __decorate([
-            App.autobind
-        ], ProjectItem.prototype, "dragEndHandler", null);
-        return ProjectItem;
-    }(App.Component));
-    App.ProjectItem = ProjectItem;
+        return Project;
+    }());
+    App.Project = Project;
 })(App || (App = {}));
 ///<reference path ="base-component.ts"  />
+///<reference path ="../decorators/autobind-decorator.ts"  />
+///<reference path ="../state/project-state.ts"  />
+///<reference path ="../models/project-model.ts"  />
+///<reference path ="../models/drag-drop-interfaces.ts"  />
 var App;
 (function (App) {
     //ProjectList Class
@@ -334,19 +292,64 @@ var App;
     }(App.Component));
     App.ProjectList = ProjectList;
 })(App || (App = {}));
-///<reference path ="models/drag-drop-interfaces.ts"  />
-///<reference path ="models/project-model.ts"  />
-///<reference path ="state/project-state.ts"  />
-///<reference path ="util/validation.ts"  />
-///<reference path ="autobind-decorator.ts"  />
-///<reference path ="components/base-component.ts"  />
 ///<reference path ="components/project-input.ts"  />
-///<reference path ="components/project-item.ts"  />
 ///<reference path ="components/project-list.ts"  />
 var App;
 (function (App) {
-    //Project Type
     var prjInput = new App.ProjectInput();
     var activePrjList = new App.ProjectList('active');
     var finishedPrjList = new App.ProjectList('finished');
+})(App || (App = {}));
+///<reference path ="base-component.ts"  />
+///<reference path ="../decorators/autobind-decorator.ts"  />
+///<reference path ="../models/project-model.ts"  />
+///<reference path ="../models/drag-drop-interfaces.ts"  />
+var App;
+(function (App) {
+    //ProjectItem Class
+    var ProjectItem = /** @class */ (function (_super) {
+        __extends(ProjectItem, _super);
+        function ProjectItem(hostId, project) {
+            var _this = _super.call(this, 'single-project', hostId, false, project.id) || this;
+            _this.project = project;
+            _this.configure();
+            _this.renderContent();
+            return _this;
+        }
+        Object.defineProperty(ProjectItem.prototype, "persons", {
+            get: function () {
+                if (this.project.people === 1) {
+                    return "1 person";
+                }
+                else {
+                    return this.project.people + " persons";
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        ProjectItem.prototype.dragStartHandler = function (event) {
+            event.dataTransfer.setData('text/plain', this.project.id);
+            event.dataTransfer.effectAllowed = "move";
+        };
+        ProjectItem.prototype.dragEndHandler = function (_) {
+        };
+        ProjectItem.prototype.configure = function () {
+            this.element.addEventListener('dragstart', this.dragStartHandler);
+            this.element.addEventListener('dragend', this.dragEndHandler);
+        };
+        ProjectItem.prototype.renderContent = function () {
+            this.element.querySelector('h2').textContent = this.project.title;
+            this.element.querySelector('h3').textContent = this.persons + '  assigned';
+            this.element.querySelector('p').textContent = this.project.description;
+        };
+        __decorate([
+            App.autobind
+        ], ProjectItem.prototype, "dragStartHandler", null);
+        __decorate([
+            App.autobind
+        ], ProjectItem.prototype, "dragEndHandler", null);
+        return ProjectItem;
+    }(App.Component));
+    App.ProjectItem = ProjectItem;
 })(App || (App = {}));
