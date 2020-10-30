@@ -5,7 +5,8 @@
   "main": "myName.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "lite-server"
+    "start": "lite-server",
+    "build": "webpack"
   },
   "author": "JesusTH",
   "license": "ISC",
